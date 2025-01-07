@@ -1,7 +1,10 @@
-from Character import Character
+from Game import Game
 
 def main():
-    char = Character("Korshoc", 69)
-    print(char)
+    game = Game()
+    game.start()
+
+    while not game.close:
+        game.update()
 
 main()
