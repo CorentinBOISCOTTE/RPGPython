@@ -8,6 +8,10 @@ class Character:
         self.intelligence = intelligence
         self.wisdom = wisdom
         self.charisma = charisma
+        self.experience = 0
+        self.level = 0
 
     def __str__(self):
-        return str(self.name) + ", " + str(self.hp) + "HP"
+        return str(self.name) + ", " + str(self.hp) + "HP" + ", strength bonus : " + str(
+            self.strength) + ", dexterity : " + str(self.dexterity) + ", constitution bonus : " + str(
+            self.constitution) + ", intelligence bonus : " + str(self.intelligence) + ", wisdom bonus : " + str(self.wisdom) + ", charisma bonus : " + str(self.charisma)

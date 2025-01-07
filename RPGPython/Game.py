@@ -1,8 +1,6 @@
-from asyncio import wait_for
 from random import randint
 from Character import Character
 import time
-import os
 
 class Game:
     def __init__(self):
@@ -10,6 +8,9 @@ class Game:
         self.character = None
 
     def start(self):
+        print("Welcome to RPGPython")
+        print("Loading...")
+        time.sleep(5)
         name = ""
         print("What is your name?")
         name = input()
@@ -29,10 +30,17 @@ class Game:
         print("You have a charisma bonus of " + str(charisma) + ".")
         self.character = Character(name, 10, strength, dexterity, constitution, intelligence, wisdom, charisma)
         print("Advice : you can type <<close>> to leave the game")
+        print("Avice : type <<info>> to get your player's information")
 
-    def update(self):
+    def check_input(self):
         user_input = str(input())
         if user_input == "close":
             print("Closing...")
-            time.sleep(5)
+            time.sleep(3)
             self.close = True
+        if user_input == "info":
+            print(self.character)
+
+    def update(self):
+        self.check_input()
+
