@@ -1,4 +1,4 @@
-from random import randint
+from random import *
 from Character import Character
 import time
 
@@ -8,40 +8,28 @@ class Game:
         self.close = False
         self.inventory = []
 
-    @staticmethod
-    def roll_stat():
-        """4d6, take the 3 highest"""
-        return sum(sorted([randint(1, 6) for i in range(4)])[1:])
+    def display_loading(self, delay=True):
+        if delay:
+            time.sleep(2)
 
-    @staticmethod
-    def skill_check(ability_score, difficulty):
+    def roll_stat(self):
+        """4d6, take the 3 highest"""
+        return sum(sorted([randint(1, 6) for _ in range(4)])[1:])
+
+    def skill_check(self, ability_score, difficulty):
         """d20"""
-        modifier = (ability_score - 10) // 2  # Calculate the modifier
+        modifier = (ability_score - 10) // 2
         roll = randint(1, 20)
         total = roll + modifier
         print(f"Rolled a {roll} + {modifier} (modifier) = {total} (DC: {difficulty})")
         return total >= difficulty
 
-    def start(self):
-        print("Welcome to RPGPython - A Text-Based Adventure")
-        print("Loading...")
-        time.sleep(2)
-
-        name = input("What is your name, adventurer? ")
-        print("\nRolling stats for your abilities...\n")
-
-        stats = {stat: self.roll_stat() for stat in ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']}
-        modifiers = {key: (value - 10) // 2 for key, value in stats.items()}
-
-        print("Your stats:")
-        for stat, value in stats.items():
-            print(f"{stat.capitalize()}: {value} (modifier: {modifiers[stat]})")
-
-        self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'],
-                                   stats['intelligence'], stats['wisdom'], stats['charisma'])
-        print(f"\nWelcome, {name}! Let your adventure begin.")
-        time.sleep(1)
-        self.zone0()
+    def get_valid_choice(self, options):
+        choice = input("Your choice: ").lower()
+        while choice not in options:
+            print(f"Invalid choice! Please choose from {', '.join(options)}.")
+            choice = input("Your choice: ").lower()
+        return choice
 
     def collect_item(self, item):
         self.inventory.append(item)
@@ -64,12 +52,33 @@ class Game:
         print(f"Inventory: {', '.join(self.inventory) if self.inventory else 'Empty'}")
         print("------------------------")
 
+    def start_adventure(self):
+        print("Welcome to RPGPython - A Text-Based Adventure")
+        print("Loading...")
+        self.display_loading()
+
+        name = input("What is your name, adventurer? ")
+        print("\nRolling stats for your abilities...\n")
+
+        stats = {stat: self.roll_stat() for stat in ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']}
+        modifiers = {key: (value - 10) // 2 for key, value in stats.items()}
+
+        print("Your stats:")
+        for stat, value in stats.items():
+            print(f"{stat.capitalize()}: {value} (modifier: {modifiers[stat]})")
+
+        self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'],
+                                   stats['intelligence'], stats['wisdom'], stats['charisma'])
+        print(f"\nWelcome, {name}! Let your adventure begin.")
+        time.sleep(1)
+        self.zone0()
+
     def zone0(self):
         print("\nYou find yourself at the edge of a dense forest. The sun is setting.")
         print("What will you do?")
         print("(a) Enter the forest cautiously\n(b) Look for a nearby village\n(c) Set up camp for the night")
 
-        choice = input("Your choice: ").lower()
+        choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
             print("You step into the forest and hear strange noises. A wild animal appears!")
             self.zone1()
@@ -81,15 +90,12 @@ class Game:
             print("You set up camp and rest. You recover your strength.")
             self.character.heal(5)
             self.zone1()
-        else:
-            print("You hesitate and the moment passes. The adventure awaits!")
-            self.zone0()
 
     def zone1(self):
         print("\nYou encounter a wild boar! It looks aggressive.")
         print("(a) Attack the boar\n(b) Try to scare it away\n(c) Climb a tree to escape")
 
-        choice = input("Your choice: ").lower()
+        choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
             if self.skill_check(self.character.strength, 12):
                 print("You strike the boar with your weapon and it runs away. You gain 5 experience points.")
@@ -110,9 +116,9 @@ class Game:
             else:
                 print("You struggle to climb and the boar hits you for 3 HP before running off.")
                 self.character.take_damage(3)
-        else:
-            print("You hesitate and the boar charges! You lose 4 HP.")
-            self.character.take_damage(4)
+
+        if self.character.hp == 0:
+            return
 
         self.character_status()
         self.zone2()
@@ -121,16 +127,13 @@ class Game:
         print("\nYou find an abandoned cabin in the woods.")
         print("(a) Search the cabin\n(b) Ignore it and move on")
 
-        choice = input("Your choice: ").lower()
+        choice = self.get_valid_choice(["a", "b"])
         if choice == "a":
             print("You search the cabin and find a healing potion!")
             self.collect_item("healing potion")
             self.character.gain_experience(3)
         elif choice == "b":
             print("You decide not to risk entering the cabin.")
-        else:
-            print("Indecision wastes time. You move on.")
-
         self.character_status()
         self.zone3()
 
@@ -138,7 +141,7 @@ class Game:
         print("\nYou reach the heart of the forest and encounter a powerful wolf!")
         print("(a) Fight the wolf\n(b) Try to tame it\n(c) Sneak past it\n(d) Use an item")
 
-        choice = input("Your choice: ").lower()
+        choice = self.get_valid_choice(["a", "b", "c", "d"])
         if choice == "a":
             if self.skill_check(self.character.strength, 15):
                 print("You defeat the wolf in a fierce battle! You gain 10 experience points.")
@@ -162,13 +165,14 @@ class Game:
         elif choice == "d":
             item = input("Which item do you want to use? ").lower()
             self.use_item(item)
-        else:
-            print("You freeze in fear. The wolf attacks! You lose 6 HP.")
-            self.character.take_damage(6)
+
+        if self.character.hp == 0:
+            return
 
         self.character_status()
         self.end_game()
 
     def end_game(self):
         print("\nYou emerge from the forest, battered but alive. The adventure ends here.")
+        print(f"Level {self.character.level} {self.character.name} finished the adventure with {self.character.hp} HP.")
         print("Thank you for playing RPGPython!")

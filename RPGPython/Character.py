@@ -20,13 +20,12 @@ class Character:
 
     def take_damage(self, damage):
         self.hp -= damage
-        if self.hp < 0:
+        if self.hp <= 0:
             self.hp = 0
+            self.die()
 
     def heal(self, amount):
-        self.hp += amount
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
+        self.hp = min(self.max_hp, self.hp + amount)
 
     def gain_experience(self, exp):
         self.experience += exp
@@ -39,6 +38,10 @@ class Character:
         self.max_hp += hp_increase
         self.hp = self.max_hp
         print(f"{self.name} leveled up to Level {self.level}! Max HP is now {self.max_hp}.")
+
+    def die(self):
+        print(f"{self.name} has died... Game Over!")
+        exit()
 
     def __str__(self):
         return (f"{self.name}, {self.hp}/{self.max_hp} HP, Level {self.level}\n"
