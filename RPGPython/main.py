@@ -7,4 +7,5 @@ def main():
     while not game.close:
         game.update()
 
-main()
+if __name__ == "__main__":
+    main()
