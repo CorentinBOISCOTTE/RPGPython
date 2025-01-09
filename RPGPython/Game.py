@@ -8,23 +8,27 @@ class Game:
         self.close = False
         self.inventory = []
 
-    def display_loading(self, delay=True):
+    @staticmethod
+    def display_loading(delay=True):
         if delay:
             time.sleep(2)
 
-    def roll_stat(self):
+    @staticmethod
+    def roll_stat():
         """4d6, take the 3 highest"""
         return sum(sorted([randint(1, 6) for _ in range(4)])[1:])
 
-    def skill_check(self, ability_score, difficulty):
+    @staticmethod
+    def skill_check(ability_score, difficulty):
         """d20"""
-        modifier = (ability_score - 10) // 2
+        modifier = Character.calculate_modifier(ability_score)
         roll = randint(1, 20)
         total = roll + modifier
         print(f"Rolled a {roll} + {modifier} (modifier) = {total} (DC: {difficulty})")
         return total >= difficulty
 
-    def get_valid_choice(self, options):
+    @staticmethod
+    def get_valid_choice(options):
         choice = input("Your choice: ").lower()
         while choice not in options:
             print(f"Invalid choice! Please choose from {', '.join(options)}.")

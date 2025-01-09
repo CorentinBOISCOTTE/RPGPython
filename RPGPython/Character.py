@@ -15,7 +15,8 @@ class Character:
         self.experience = 0
         self.level = 1
 
-    def calculate_modifier(self, score):
+    @staticmethod
+    def calculate_modifier(score):
         return (score - 10) // 2
 
     def take_damage(self, damage):
@@ -34,7 +35,7 @@ class Character:
 
     def level_up(self):
         self.level += 1
-        hp_increase = max(1, randint(1, 10) + self.calculate_modifier(self.constitution))
+        hp_increase = max(1, randint(1, 10) + Character.calculate_modifier(self.constitution))
         self.max_hp += hp_increase
         self.hp = self.max_hp
         print(f"{self.name} leveled up to Level {self.level}! Max HP is now {self.max_hp}.")
