@@ -1,5 +1,4 @@
 from random import *
-
 from ASCII_art import *
 from Character import Character
 import time
@@ -59,6 +58,10 @@ class Game:
             draw_healing()
             print("You used a healing potion and restored 5 HP!")
             self.inventory.remove(item)
+        elif item == "magic scroll":
+            print("You use the magic scroll to enhance your next action!")
+            self.character.strength += 2  # Temporary boost
+            self.inventory.remove(item)
         else:
             print(f"{item} cannot be used right now.")
 
@@ -68,6 +71,10 @@ class Game:
         print(f"Inventory: {', '.join(self.inventory) if self.inventory else 'Empty'}")
         print("------------------------")
 
+    def check_game_over(self):
+        if self.character.hp <= 0:
+            print(f"{self.character.name} has succumbed to their injuries. Game Over!")
+            exit()
 
     def start_adventure(self):
         print("Welcome to RPGPython - A Text-Based Adventure")
@@ -93,17 +100,24 @@ class Game:
     def zone0(self):
         draw_forest()
         print("\nYou find yourself at the edge of a dense forest. The sun is setting.")
+        events = [
+            "A friendly merchant approaches and offers supplies. Something seems off about him, you decline his offer.",
+            "You hear a rustling in the bushes. Something is watching you.",
+            "The night is calm, and you rest peacefully."
+        ]
+        print(events[randint(0, len(events) - 1)])
         print("What will you do?")
         print("(a) Enter the forest cautiously\n(b) Set up camp for the night")
 
-        choice = self.get_valid_choice(["a", "b"]).lower()
+        choice = self.get_valid_choice(["a", "b"])
         if choice == "a":
             print("You step into the forest and hear strange noises. A wild animal appears!")
             self.wait_input()
         elif choice == "b":
             print("You set up camp and rest. You recover your strength.")
             time.sleep(2)
-            user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer) [y/n]").lower()
+            print("Do you wish to continue the adventure? (if you say no you will quit being an adventurer) [y/n]")
+            user_input = self.get_valid_choice(["y", "n"])
             if user_input == "y":
                 print("You decide to continue the adventure and wander into the forest.")
                 time.sleep(2)
@@ -118,7 +132,7 @@ class Game:
         print("\nYou encounter a wild boar! It looks aggressive.")
         print("(a) Attack the boar\n(b) Try to scare it away\n(c) Climb a tree to escape")
 
-        choice = self.get_valid_choice(["a", "b", "c"]).lower()
+        choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
             if self.skill_check(self.character.strength, 12):
                 print("You strike the boar with your weapon and it runs away. You gain 5 experience points.")
@@ -140,9 +154,7 @@ class Game:
                 print("You struggle to climb and the boar hits you for 3 HP before running off.")
                 self.character.take_damage(3)
 
-        if self.character.hp == 0:
-            return
-
+        self.check_game_over()
         self.character_status()
         self.wait_input()
         self.zone2()
@@ -160,32 +172,32 @@ class Game:
             self.character.gain_experience(3)
         elif choice == "b":
             print("You decide not to risk entering the cabin.")
+
         self.character_status()
-        print("What do you wish to do now ?")
+        print("What do you wish to do now?")
         print("(a) Continue\n(b) Find a nearby village")
 
-        user_input = self.get_valid_choice(["a", "b"]).lower()
+        user_input = self.get_valid_choice(["a", "b"])
         if user_input == "a":
             self.zone3()
         elif user_input == "b":
             print("You find a small village where the locals welcome you with a meal. You heal 1 HP")
             self.character.heal(1)
             time.sleep(1)
-            user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer, and you will stay with the villagers) [y/n]").lower()
+            print("Do you wish to continue the adventure? (if you say no you will quit being an adventurer, and you will stay with the villagers) [y/n]")
+            user_input = self.get_valid_choice(["y", "n"]).lower()
             if user_input == "y":
                 print("You decide to continue the adventure and go even deeper into the forest.")
                 time.sleep(2)
             else:
                 print("You quit being an adventurer, you will stay with the villagers and found a family.")
                 exit()
+
         self.zone3()
 
     def zone3(self):
         self.wolf_fight()
-
-        if self.character.hp == 0:
-            return
-
+        self.check_game_over()
         self.character_status()
         time.sleep(2)
         self.end_game()
@@ -195,7 +207,7 @@ class Game:
         print("\nYou reach the heart of the forest and encounter a powerful wolf!")
         print("(a) Fight the wolf\n(b) Try to tame it\n(c) Sneak past it\n(d) Use an item")
 
-        choice = self.get_valid_choice(["a", "b", "c", "d"]).lower()
+        choice = self.get_valid_choice(["a", "b", "c", "d"])
         if choice == "a":
             if self.skill_check(self.character.strength, 15):
                 print("You defeat the wolf in a fierce battle! You gain 10 experience points.")
