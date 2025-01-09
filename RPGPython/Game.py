@@ -60,6 +60,15 @@ class Game:
         print(f"Inventory: {', '.join(self.inventory) if self.inventory else 'Empty'}")
         print("------------------------")
 
+    def wait_input(self):
+        user_input = str(input("Do you want to continue? [y/n]").lower())
+        if user_input == "y":
+            return
+        elif user_input == "n":
+            print("Thank you for playing.")
+            exit()
+
+
     def start_adventure(self):
         print("Welcome to RPGPython - A Text-Based Adventure")
         print("Loading...")
@@ -90,14 +99,28 @@ class Game:
         choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
             print("You step into the forest and hear strange noises. A wild animal appears!")
+            self.wait_input()
         elif choice == "b":
-            print("You find a small village where the locals welcome you with a meal.")
+            print("You find a small village where the locals welcome you with a meal. You heal 3 HP")
             self.character.heal(3)
+            time.sleep(1)
+            user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer, and you will stay with the villagers) [y/n]").lower()
+            if user_input == "y":
+                print("You decide to continue the adventure.")
+            else:
+                print("You quit being an adventurer, you will stay with the villagers and found a family.")
+                exit()
         elif choice == "c":
-            print("You set up camp and rest. You recover your strength.")
+            print("You set up camp and rest. You recover your strength. You heal 5 HP")
             self.character.heal(5)
+            time.sleep(1)
+            user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer) [y/n]").lower()
+            if user_input == "y":
+                print("You decide to continue the adventure.")
+            else:
+                print("You quit being an adventurer, you prefer sleeping by the campfire.")
+                exit()
 
-        time.sleep(2)
         self.zone1()
 
     def zone1(self):
@@ -131,7 +154,7 @@ class Game:
             return
 
         self.character_status()
-        time.sleep(2)
+        self.wait_input()
         self.zone2()
 
     def zone2(self):
@@ -148,7 +171,7 @@ class Game:
         elif choice == "b":
             print("You decide not to risk entering the cabin.")
         self.character_status()
-        time.sleep(2)
+        self.wait_input()
         self.zone3()
 
     def zone3(self):
@@ -190,6 +213,7 @@ class Game:
         elif choice == "d":
             item = input("Which item do you want to use? ").lower()
             self.use_item(item)
+            self.wait_input()
             self.wolf_fight()
 
     def end_game(self):
