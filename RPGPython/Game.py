@@ -1,9 +1,8 @@
 from random import *
 
-from ASCII_art import draw_forest, draw_cabin, draw_potion, draw_healing, draw_wolf, draw_boar
+from ASCII_art import *
 from Character import Character
 import time
-import ASCII_art
 
 class Game:
     def __init__(self):
@@ -52,16 +51,16 @@ class Game:
         print(f"You have collected a {item}.")
 
     def use_item(self, item):
-        if item in self.inventory:
-            if item == "healing potion":
-                self.character.heal(5)
-                draw_healing()
-                print("You used a healing potion and restored 5 HP!")
-            else:
-                print(f"{item} cannot be used right now.")
+        if item not in self.inventory:
+            print(f"You don't have a {item} in your inventory.")
+            return
+        if item == "healing potion":
+            self.character.heal(5)
+            draw_healing()
+            print("You used a healing potion and restored 5 HP!")
             self.inventory.remove(item)
         else:
-            print(f"You don't have a {item} in your inventory.")
+            print(f"{item} cannot be used right now.")
 
     def character_status(self):
         print("\n--- Character Status ---")
