@@ -38,6 +38,15 @@ class Game:
             choice = input("Your choice: ").lower()
         return choice
 
+    @staticmethod
+    def wait_input():
+        user_input = str(input("Do you wish to continue? [y/n]").lower())
+        if user_input == "y":
+            return
+        elif user_input == "n":
+            print("Thank you for playing.")
+            exit()
+
     def collect_item(self, item):
         self.inventory.append(item)
         print(f"You have collected a {item}.")
@@ -59,14 +68,6 @@ class Game:
         print(self.character)
         print(f"Inventory: {', '.join(self.inventory) if self.inventory else 'Empty'}")
         print("------------------------")
-
-    def wait_input(self):
-        user_input = str(input("Do you want to continue? [y/n]").lower())
-        if user_input == "y":
-            return
-        elif user_input == "n":
-            print("Thank you for playing.")
-            exit()
 
 
     def start_adventure(self):
@@ -106,7 +107,8 @@ class Game:
             time.sleep(1)
             user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer, and you will stay with the villagers) [y/n]").lower()
             if user_input == "y":
-                print("You decide to continue the adventure.")
+                print("You decide to continue the adventure and wander into the forest.")
+                time.sleep(2)
             else:
                 print("You quit being an adventurer, you will stay with the villagers and found a family.")
                 exit()
@@ -116,7 +118,8 @@ class Game:
             time.sleep(1)
             user_input = input("Do you wish to continue the adventure? (if you say no you will quit being an adventurer) [y/n]").lower()
             if user_input == "y":
-                print("You decide to continue the adventure.")
+                print("You decide to continue the adventure and wander into the forest.")
+                time.sleep(2)
             else:
                 print("You quit being an adventurer, you prefer sleeping by the campfire.")
                 exit()
