@@ -1,6 +1,9 @@
 from random import *
+
+from ASCII_art import draw_forest, draw_cabin, draw_potion, draw_healing, draw_wolf, draw_boar
 from Character import Character
 import time
+import ASCII_art
 
 class Game:
     def __init__(self):
@@ -43,6 +46,7 @@ class Game:
         if item in self.inventory:
             if item == "healing potion":
                 self.character.heal(5)
+                draw_healing()
                 print("You used a healing potion and restored 5 HP!")
             else:
                 print(f"{item} cannot be used right now.")
@@ -74,10 +78,11 @@ class Game:
         self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'],
                                    stats['intelligence'], stats['wisdom'], stats['charisma'])
         print(f"\nWelcome, {name}! Let your adventure begin.")
-        time.sleep(1)
+        time.sleep(2)
         self.zone0()
 
     def zone0(self):
+        draw_forest()
         print("\nYou find yourself at the edge of a dense forest. The sun is setting.")
         print("What will you do?")
         print("(a) Enter the forest cautiously\n(b) Look for a nearby village\n(c) Set up camp for the night")
@@ -85,17 +90,18 @@ class Game:
         choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
             print("You step into the forest and hear strange noises. A wild animal appears!")
-            self.zone1()
         elif choice == "b":
             print("You find a small village where the locals welcome you with a meal.")
             self.character.heal(3)
-            self.zone1()
         elif choice == "c":
             print("You set up camp and rest. You recover your strength.")
             self.character.heal(5)
-            self.zone1()
+
+        time.sleep(2)
+        self.zone1()
 
     def zone1(self):
+        draw_boar()
         print("\nYou encounter a wild boar! It looks aggressive.")
         print("(a) Attack the boar\n(b) Try to scare it away\n(c) Climb a tree to escape")
 
@@ -125,23 +131,38 @@ class Game:
             return
 
         self.character_status()
+        time.sleep(2)
         self.zone2()
 
     def zone2(self):
+        draw_cabin()
         print("\nYou find an abandoned cabin in the woods.")
         print("(a) Search the cabin\n(b) Ignore it and move on")
 
         choice = self.get_valid_choice(["a", "b"])
         if choice == "a":
+            draw_potion()
             print("You search the cabin and find a healing potion!")
             self.collect_item("healing potion")
             self.character.gain_experience(3)
         elif choice == "b":
             print("You decide not to risk entering the cabin.")
         self.character_status()
+        time.sleep(2)
         self.zone3()
 
     def zone3(self):
+        self.wolf_fight()
+
+        if self.character.hp == 0:
+            return
+
+        self.character_status()
+        time.sleep(2)
+        self.end_game()
+
+    def wolf_fight(self):
+        draw_wolf()
         print("\nYou reach the heart of the forest and encounter a powerful wolf!")
         print("(a) Fight the wolf\n(b) Try to tame it\n(c) Sneak past it\n(d) Use an item")
 
@@ -169,12 +190,7 @@ class Game:
         elif choice == "d":
             item = input("Which item do you want to use? ").lower()
             self.use_item(item)
-
-        if self.character.hp == 0:
-            return
-
-        self.character_status()
-        self.end_game()
+            self.wolf_fight()
 
     def end_game(self):
         print("\nYou emerge from the forest, battered but alive. The adventure ends here.")
