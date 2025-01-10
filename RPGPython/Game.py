@@ -14,6 +14,7 @@ class Game:
         self.font = pygame.font.Font(None, 24)
         self.current_text = ""  # Text displayed on the screen
         self.waiting_for_input = False
+        self.clock = pygame.time.Clock()
 
     def start_adventure(self):
         self.character_creation()
@@ -159,6 +160,7 @@ class Game:
 
     def display_message(self, text):
         self.current_text = text
+        self.render()
 
     def render(self):
         self.screen.fill((0, 0, 0))
@@ -166,26 +168,36 @@ class Game:
         for i, line in enumerate(lines):
             text_surface = self.font.render(line, True, (255, 255, 255))
             self.screen.blit(text_surface, (20, 20 + i * 30))
+            pygame.display.flip()
 
     def get_player_input(self):
         name = ""
-        while True:
+        run = True
+        while run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        return name
+                        run = False
                     elif event.key == pygame.K_BACKSPACE:
                         name = name[:-1]
                     else:
                         name += event.unicode
             self.display_message(f"Enter your name: {name}")
             self.render()
-            pygame.display.flip()
+            try:
+                pygame.display.flip()
+            except Exception as e:
+                print(f"Display flip error: {e}")
+                pygame.quit()
+                exit()
+            self.clock.tick(60)
+        return name
 
-    def get_valid_choice(self, options):
+    @staticmethod
+    def get_valid_choice(options):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
