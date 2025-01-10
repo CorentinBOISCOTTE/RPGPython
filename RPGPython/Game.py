@@ -1,7 +1,5 @@
 import pygame
 from random import randint
-
-from ASCII_art import draw_forest
 from Character import Character
 
 class Game:
@@ -58,7 +56,7 @@ class Game:
 
         for stat_name, stat_value in stats:
             modifier = self.calculate_modifier(stat_value)
-            self.add_message(f"{stat_name}: {stat_value} (modifier: {modifier})")
+            self.add_message(f"{stat_name}: {stat_value} (modifier = {modifier})")
 
         inventory_display = ', '.join(self.inventory) if self.inventory else 'Empty'
         self.add_message(f"Inventory: {inventory_display}")
@@ -72,7 +70,7 @@ class Game:
         self.display_loading()
         name = self.get_player_input("What is your name, adventurer?")
         self.add_message("\\nRolling stats for your abilities...")
-        self.wait_for_continue()
+        pygame.time.wait(2000)
 
         stats = {stat: self.roll_stat() for stat in ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']}
         self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'], stats['intelligence'], stats['wisdom'], stats['charisma'], self)
@@ -173,14 +171,15 @@ class Game:
         elif choice == "b":
             self.add_message("You walk towards the village.")
             self.wait_for_continue()
+            self.current_image = self.village_image
+            self.text_lines = []
+            self.add_message("It is a small village where the locals welcome you with a meal. You heal 2 HP.")
+            self.character.heal(2)
+            self.character_status()
             self.visit_village()
 
     def visit_village(self):
-        self.current_image = self.village_image
         self.text_lines = []
-        self.add_message("It is a small village where the locals welcome you with a meal. You heal 2 HP.")
-        self.character.heal(2)
-        self.character_status()
         self.add_message("The village seems bustling with activity. Who would you like to talk to?\\n(a) The merchant\\n(b) The blacksmith\\n(c) The elder\\n(d) Leave the village")
         choice = self.get_valid_choice(["a", "b", "c", "d"])
         if choice == "a":
@@ -317,7 +316,7 @@ class Game:
         modifier = self.calculate_modifier(ability_score)
         total = roll + modifier
         self.add_message(f"{ability_name} check...\\n")
-        self.wait_for_continue()
+        pygame.time.wait(2000)
         self.add_message(f"Roll: {roll} + (modifier): {modifier} = Total: {total} (DC: {difficulty})")
         self.wait_for_continue()
         return total >= difficulty
