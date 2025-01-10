@@ -41,6 +41,32 @@ class Game:
                     if self.button_rect.collidepoint(event.pos):
                         return
 
+    def character_status(self):
+        stats = [
+            ("Strength", self.character.strength),
+            ("Dexterity", self.character.dexterity),
+            ("Constitution", self.character.constitution),
+            ("Intelligence", self.character.intelligence),
+            ("Wisdom", self.character.wisdom),
+            ("Charisma", self.character.charisma),
+        ]
+
+        self.add_message("--- Character Status ---")
+        self.add_message(f"Name: {self.character.name}")
+        self.add_message(f"Level: {self.character.level}")
+        self.add_message(f"HP: {self.character.hp}/{self.character.max_hp}")
+
+        for stat_name, stat_value in stats:
+            modifier = self.calculate_modifier(stat_value)
+            self.add_message(f"{stat_name}: {stat_value} (modifier: {modifier})")
+
+        inventory_display = ', '.join(self.inventory) if self.inventory else 'Empty'
+        self.add_message(f"Inventory: {inventory_display}")
+        self.add_message("------------------------")
+
+        self.render()
+        self.wait_for_continue()
+
     def start_adventure(self):
         self.add_message("Welcome to RPGPython - A Text-Based Adventure")
         self.display_loading()
@@ -49,26 +75,30 @@ class Game:
         self.wait_for_continue()
 
         stats = {stat: self.roll_stat() for stat in ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma']}
-        self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'], stats['intelligence'], stats['wisdom'], stats['charisma'])
-        self.add_message("Your stats:\\n" + "\\n".join([f"{stat.capitalize()}: {value}" for stat, value in stats.items()]))
-        self.wait_for_continue()
+        self.character = Character(name, stats['constitution'], stats['strength'], stats['dexterity'], stats['intelligence'], stats['wisdom'], stats['charisma'], self)
+        #self.add_message("Your stats:\\n" + "\\n".join([f"{stat.capitalize()}: {value} (modifier = {self.calculate_modifier(value)})" for stat, value in stats.items()]))
+        #self.wait_for_continue()
+        self.character_status()
         self.zone0()
 
     def display_loading(self):
         self.add_message("Loading...")
-        self.wait_for_continue()
+        pygame.time.wait(2000)
 
     def check_game_over(self):
-        if self.character.hp <= 0:
-            self.add_message(f"{self.character.name} has succumbed to their injuries. Game Over!")
-            self.wait_for_continue()
-            pygame.quit()
-            exit()
+        self.add_message(f"{self.character.name} has succumbed to their injuries. Game Over!")
+        self.wait_for_continue()
+        pygame.quit()
+        exit()
 
     @staticmethod
     def roll_stat():
         rolls = [randint(1, 6) for _ in range(4)]
-        return sum(sorted(rolls)[1:])  # Drop the lowest roll
+        return sum(sorted(rolls)[1:])
+
+    @staticmethod
+    def calculate_modifier(ability_score):
+        return (ability_score - 10) // 2
 
     def zone0(self):
         self.current_image = self.forest_image
@@ -92,6 +122,7 @@ class Game:
 
     def zone1(self):
         self.current_image = self.boar_image
+        self.text_lines = []
         self.add_message("You encounter a wild boar! It looks aggressive.\\n(a) Attack the boar\\n(b) Try to scare it away\\n(c) Climb a tree to escape")
         choice = self.get_valid_choice(["a", "b", "c"])
         if choice == "a":
@@ -114,22 +145,25 @@ class Game:
             else:
                 self.add_message("You struggle to climb and the boar hits you for 3 HP before running off.")
                 self.character.take_damage(3)
-        self.check_game_over()
-        self.wait_for_continue()
+        self.character_status()
         self.zone2()
 
     def zone2(self):
         self.current_image = self.shrek_toilet_image
+        self.text_lines = []
         self.add_message("You find an abandoned cabin in the woods.\\n(a) Search the cabin\\n(b) Ignore it and move on")
         choice = self.get_valid_choice(["a", "b"])
         if choice == "a":
+            self.text_lines = []
             self.current_image = self.healing_potion_image
             self.add_message("You search the cabin and find a healing potion!")
             self.collect_item("healing potion")
             self.character.gain_experience(3)
+            self.character_status()
         elif choice == "b":
             self.add_message("You decide not to risk entering the cabin.")
-        self.wait_for_continue()
+            self.wait_for_continue()
+        self.text_lines = []
         self.add_message("You see a village in the distance. Do you want to go there?\\n(a) Continue your adventure\\n(b) Go to the village")
         choice = self.get_valid_choice(["a", "b"])
         if choice == "a":
@@ -143,8 +177,10 @@ class Game:
 
     def visit_village(self):
         self.current_image = self.village_image
-        self.add_message("It is a small village where the locals welcome you with a meal. You heal 1 HP.")
-        self.character.heal(1)
+        self.text_lines = []
+        self.add_message("It is a small village where the locals welcome you with a meal. You heal 2 HP.")
+        self.character.heal(2)
+        self.character_status()
         self.add_message("The village seems bustling with activity. Who would you like to talk to?\\n(a) The merchant\\n(b) The blacksmith\\n(c) The elder\\n(d) Leave the village")
         choice = self.get_valid_choice(["a", "b", "c", "d"])
         if choice == "a":
@@ -159,6 +195,7 @@ class Game:
         self.visit_village()  # Recursively allow further interaction
 
     def merchant_interaction(self):
+        self.text_lines = []
         if self.spoke_to_merchant:
             self.add_message("Use that scroll wisely.")
             return
@@ -171,6 +208,7 @@ class Game:
             if self.skill_check(self.character.charisma, 13, "Charisma"):
                 self.add_message("The merchant is impressed by your words and hands over the magic scroll.")
                 self.collect_item("magic scroll")
+                self.character_status()
                 self.spoke_to_merchant = True
             else:
                 self.add_message("'You’ll need to try harder than that,' the merchant says, shaking his head.")
@@ -181,6 +219,7 @@ class Game:
             self.add_message("You thank the merchant and leave.")
 
     def blacksmith_interaction(self):
+        self.text_lines = []
         if self.spoke_to_blacksmith:
             self.add_message("Come on! Go get that wolf!")
             return
@@ -197,8 +236,8 @@ class Game:
         elif choice == "b":
             self.add_message("'There’s a dangerous wolf in the forest. Bring me its fang, and I’ll forge you something special.'")
             self.add_message("The blacksmith looks you over. 'Think you can handle it?'")
-            follow_up = self.get_valid_choice(["yes", "no"])
-            if follow_up == "yes":
+            follow_up = self.get_valid_choice(["y", "n"])
+            if follow_up == "y":
                 self.add_message("You accept the blacksmith’s task and prepare for the challenge.")
                 self.collect_item("quest: wolf fang")
                 self.spoke_to_blacksmith = True
@@ -208,6 +247,7 @@ class Game:
             self.add_message("You thank the blacksmith and leave.")
 
     def elder_interaction(self):
+        self.text_lines = []
         if self.spoke_to_elder:
             self.add_message("You must be wise, young one. That was a difficult riddle.")
             return
@@ -223,6 +263,7 @@ class Game:
                 self.add_message("'An echo,' you say.")
                 self.add_message("The elder nods approvingly. 'You are wise indeed. Take this blessing.'")
                 self.character.gain_experience(5)
+                self.character_status()
                 self.spoke_to_elder = True
             else:
                 self.add_message("The elder shakes his head. 'That is not the correct answer.'")
@@ -234,6 +275,7 @@ class Game:
         self.end_game()
 
     def wolf_fight(self):
+        self.text_lines = []
         self.current_image = self.wolf_image
         self.add_message("You encounter a powerful wolf!\\n(a) Fight the wolf\\n(b) Try to tame it\\n(c) Sneak past it\\n(d) Use an item")
         choice = self.get_valid_choice(["a", "b", "c", "d"])
@@ -266,17 +308,17 @@ class Game:
 
     def end_game(self):
         self.add_message(f"You emerge from the forest, battered but alive.\\nLevel {self.character.level} {self.character.name} finished the adventure with {self.character.hp} HP.\\nThank you for playing RPGPython!")
-        self.wait_for_continue()
+        self.character_status()
         pygame.quit()
         exit()
 
     def skill_check(self, ability_score, difficulty, ability_name):
         roll = randint(1, 20)
-        modifier = (ability_score - 10) // 2
+        modifier = self.calculate_modifier(ability_score)
         total = roll + modifier
         self.add_message(f"{ability_name} check...\\n")
         self.wait_for_continue()
-        self.add_message(f"Roll: {roll} + Modifier: {modifier} = Total: {total} (DC: {difficulty})")
+        self.add_message(f"Roll: {roll} + (modifier): {modifier} = Total: {total} (DC: {difficulty})")
         self.wait_for_continue()
         return total >= difficulty
 
@@ -293,10 +335,12 @@ class Game:
             self.character.heal(5)
             self.add_message("You used a healing potion and restored 5 HP!")
             self.inventory.remove(item)
+            self.character_status()
         elif item == "magic scroll":
             self.character.strength = min(20, self.character.strength + 2)
             self.add_message("You use the magic scroll to enhance your next action!")
             self.inventory.remove(item)
+            self.character_status()
         else:
             self.add_message(f"The {item} cannot be used right now.")
 
@@ -333,11 +377,12 @@ class Game:
                     else:
                         name += event.unicode
 
+            self.text_lines = []
             self.add_message(prompt + f" {name}")
 
             pygame.display.flip()
 
-            pygame.time.wait(100)
+            pygame.time.wait(10)
 
         return name
 

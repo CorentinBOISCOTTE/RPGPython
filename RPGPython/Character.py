@@ -1,7 +1,8 @@
 from random import randint
+import Game
 
 class Character:
-    def __init__(self, name, constitution, strength, dexterity, intelligence, wisdom, charisma):
+    def __init__(self, name, constitution, strength, dexterity, intelligence, wisdom, charisma, game:Game):
         self.name = name
         self.constitution = constitution
         self.strength = strength
@@ -9,6 +10,7 @@ class Character:
         self.intelligence = intelligence
         self.wisdom = wisdom
         self.charisma = charisma
+        self.game = game
 
         self.max_hp = 10 + self.calculate_modifier(constitution)
         self.hp = self.max_hp
@@ -38,11 +40,10 @@ class Character:
         hp_increase = max(1, randint(1, 10) + Character.calculate_modifier(self.constitution))
         self.max_hp += hp_increase
         self.hp = self.max_hp
-        print(f"{self.name} leveled up to Level {self.level}! Max HP is now {self.max_hp}.")
+        self.game.add_message(f"{self.name} leveled up to Level {self.level}! Max HP is now {self.max_hp}.")
 
     def die(self):
-        print(f"{self.name} has died... Game Over!")
-        exit()
+        self.game.game_over()
 
     def __str__(self):
         return (f"{self.name}, {self.hp}/{self.max_hp} HP, Level {self.level}\n"
