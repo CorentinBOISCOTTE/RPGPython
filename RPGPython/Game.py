@@ -21,10 +21,10 @@ class Game:
         self.text_rect = self.text.get_rect(center=(self.button_surface.get_width() / 2, self.button_surface.get_height() / 2))
         self.forest_image = pygame.image.load("images/forest.png").convert()
         self.boar_image = pygame.image.load("images/boar.png").convert()
-        self.shrek_toilet_image = pygame.image.load("images/shrek_toilet.jpg").convert()
-        self.healing_potion_image = pygame.image.load("images/healing_potion.jpg").convert()
-        self.healing_image = pygame.image.load("images/healing.jpg").convert()
-        self.village_image = pygame.image.load("images/village.jpg").convert()
+        self.shrek_toilet_image = pygame.image.load("images/shrek_toilet.png").convert()
+        self.healing_potion_image = pygame.image.load("images/healing_potion.png").convert()
+        self.healing_image = pygame.image.load("images/healing.png").convert()
+        self.village_image = pygame.image.load("images/village.png").convert()
         self.wolf_image = pygame.image.load("images/wolf.png").convert()
         self.current_image = None
 
